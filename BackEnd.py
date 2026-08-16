@@ -29,28 +29,49 @@ class Jardinagem(db.Model):
         return {
             "id": self.id,
             "atividade": self.atividade,
-            "data": self.data_agendada,strftime('%y-%m-%d'),
+            "data": self.data_agendada.strftime('%y-%m-%d'),
             "status": self.status,
             "observacao": self.observacao
         }
 
-# 
+# Espaço onde serão listados todos os eventos
 @app.route('/api/jardinagem', methods=['GET'])
 def get_jardinagem():
     eventos = Jardinagem.query.order_by(Jardinagem.data_agendada.asc()).all()
-    return jsonify
+    return jsonify([evento.to_dict() for evento in eventos])
 
-    return jsonify({"status": "API do COndomínio rodando com sucesso!"})
+# Espaço onde o Síndico um novo evento
+@app.route('/api/jardinagem', methods=['POST'])
+def add_jardinagem():
+    dados = request.get_json()
+
+    novo_evento = Jardinagem(
+        atividade=dados.get('atividade'),
+        data_agendada=datetime.strptime(dados.get('data'), '%y-%m-%d').data(),
+        status=dados.get('status', 'Agendado'),
+        observacao=dados.get('observacao')
+    )
+
+    db.session.add(novo_evento)
+    db.session.commit()
+
+
+    return jsonify({"mensagem": "Evento cadastrado com sucesso!", "evento": novo_evento.to_dict()}), 201
+
+
 
 # Rota inicial do calendário de jardinagem
-@app.route('/api/jardinagem', methods=['GET'])
-def get_jardinagem():
-    eventos = [
-        {"id": 1, "atividade": "Poda das árvores e arbustos", "data": "2026-08-20", "status": "Agendado"}
-        {"id": 2, "atividade": "Adubação do jardim frontal", "data": "2026-08-28", "status": "Agendado"}
+# @app.route('/api/jardinagem', methods=['GET'])
+# def get_jardinagem():
+    # eventos = [
+        # {"id": 1, "atividade": "Poda das árvores e arbustos", "data": # "2026-08-20", "status": "Agendado"}
+        # {"id": 2, "atividade": "Adubação do jardim frontal", "data": # "2026-08-28", "status": "Agendado"}
      
-    ]
-    return jsonify(eventos)
+    # ]
+    # return jsonify(eventos)
 
 if __name_ == '__main__':
+# criar as tabelas de forma automática no PostgreSQL em caso de ela não existitem
+    with app.app_context():
+        db.creat_all()
     app.run(debug=True, port=5000)
