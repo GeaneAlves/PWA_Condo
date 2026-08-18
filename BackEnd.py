@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from flask_cors import flask_cors
+from flask_cors import flask_CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
@@ -10,7 +10,7 @@ CORS(app)      # link de acesso do Front End JavaScrip à API
 # Substituir com a URL do  banco PostgreSQL real (local ou nuvem como Supabase/Neon/Render)
 # Formato: postgresql://usuario:senha@host:porta/nome_do_banco
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:suasenha@localhost:5432/condoconnect_db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Ltech*!9349@db.gymbtnuoahfpaqdwhwqj.supabase.co:5432/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(APP)
