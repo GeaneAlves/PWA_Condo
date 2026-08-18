@@ -1,4 +1,4 @@
-
+// Lógica de aplicação PWA para gerenciar o cache e permitir que a aplicação funcione offline.
 const API_URL = 'https://fantastic-space-sniffle-975495vj965jhp7q-5000.app.github.dev/api/jardinagem'
 
 async function carregarJardinagem() {
@@ -39,3 +39,39 @@ async function carregarJardinagem() {
 }
 
 document.addEventListener('DOMContentLoaded', carregarJardinagem);
+
+const formJardinagem = document.getElementById('form-jardinagem');
+
+if (formJardinagem) {
+    formJardinagem.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Impede a página de recarregar
+
+        const novoEvento = {
+            atividade: document.getElementById('atividade').value,
+            data: document.getElementById('data').value,
+            status: document.getElementById('status').value,
+            observacao: document.getElementById('observacao').value
+        };
+
+        try {
+            const resposta = await fetch(API_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(novoEvento)
+            });
+
+            if (resposta.ok) {
+                alert('Manutenção cadastrada com sucesso!');
+                formJardinagem.reset(); // Limpa os campos
+                carregarJardinagem();   // Recarrega a lista automaticamente na tela
+            } else {
+                alert('Erro ao salvar os dados no servidor.');
+            }
+        } catch (erro) {
+            console.error('Erro na requisição POST:', erro);
+            alert('Falha na comunicação com a API.');
+        }
+    });
+}

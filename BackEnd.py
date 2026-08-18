@@ -50,6 +50,9 @@ def get_jardinagem():
 def add_jardinagem():
     dados = request.get_json()
 
+    if not dados or not dados.get('atividade') or not dados.get('data'):
+        return jsonify({"erro": "Atividade e data são obrigatórias!"}), 400
+
     novo_evento = Jardinagem(
         atividade=dados.get('atividade'),
         data_agendada=datetime.strptime(dados.get('data'), '%y-%m-%d').data(),
@@ -61,7 +64,9 @@ def add_jardinagem():
     db.session.commit()
 
 
-    return jsonify({"mensagem": "Evento cadastrado com sucesso!", "evento": novo_evento.to_dict()}), 201
+    return jsonify({
+        "mensagem": "Evento cadastrado com sucesso!",
+        "evento": novo_evento.to_dict()}), 201
 
 
 

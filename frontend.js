@@ -1,3 +1,5 @@
+ // tem a função de service worker, que é responsável por gerenciar o cache e permitir que a aplicação funcione offline.
+
 const CACHE_NAME = 'condo-pwa-v1';
 const urlsToCache = [
   '/',

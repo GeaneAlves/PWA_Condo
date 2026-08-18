@@ -53,3 +53,54 @@ h1 {
     font-size: 0.8rem;
     font-weight: bold;
 }
+
+#form-jardinagem-container {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    max-width: 500px;
+    margin-top: 24px;
+}
+
+.campo {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 12px;
+}
+
+.campo label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+    color: #444;
+}
+
+.campo input, .campo select, .campo textarea {
+    padding: 8px 12px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 0.95rem;
+}
+
+.campo textarea {
+    resize: vertical;
+    min-height: 60px;
+}
+
+#btn-salvar {
+    width: 100%;
+    background-color: #2e7d32;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+#btn-salvar:hover {
+    background-color: #1b5e20;
+}

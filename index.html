@@ -1,21 +1,55 @@
 <!DOCTYPE html>
-<html lang="pt_BR">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta mane="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CondoConnect</title>
-    <link rel="manifest" href="manisfest.json">
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="assets/css/style.css">
     <meta name="theme-color" content="#2e7d32">
 </head>
 <body>
     <h1>CondoConnect - Painel do Condomínio</h1>
+
+    <!-- 1. Lista de Manutenções -->
     <div id="jardinagem-container">
-        <h2>📅 Próximas Manutenções no Jardim</h2>
+        <h2>🗓️ Próximas Manutenções no Jardim</h2>
         <ul id="lista-jardinagem"></ul>
     </div>
 
-    <script src="assets/js/app.js"></script>
+    <!-- 2. Formulário do Síndico -->
+    <section id="form-jardinagem-container">
+        <h2>➕ Agendar Manutenção de Jardinagem</h2>
+        <form id="form-jardinagem">
+            <div class="campo">
+                <label for="atividade">Atividade:</label>
+                <input type="text" id="atividade" placeholder="Ex: Poda das árvores" required>
+            </div>
+
+            <div class="campo">
+                <label for="data">Data Agendada:</label>
+                <input type="date" id="data" required>
+            </div>
+
+            <div class="campo">
+                <label for="status">Status:</label>
+                <select id="status">
+                    <option value="Agendado">Agendado</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Concluído">Concluído</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="observacao">Observações (opcional):</label>
+                <textarea id="observacao" placeholder="Ex: Contratada equipe terceirizada"></textarea>
+            </div>
+
+            <button type="submit" id="btn-salvar">Salvar Agendamento</button>
+        </form>
+    </section>
+
+    <!-- Chamada única do JavaScript -->
     <script src="assets/js/app.js"></script>
 </body>
 </html>
