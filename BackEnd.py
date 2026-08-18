@@ -1,19 +1,19 @@
 from flask import Flask, jsonify, request
-from flask_CORS import flask_CORS
+from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
-app = Flask(__name_)
+app = Flask(__name__)
 CORS(app)      # link de acesso do Front End JavaScrip à API
 
 
 # Substituir com a URL do  banco PostgreSQL real (local ou nuvem como Supabase/Neon/Render)
 # Formato: postgresql://usuario:senha@host:porta/nome_do_banco
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres:Ltech*!9349@db.gymbtnuoahfpaqdwhwqj.supabase.co:5432/postgres'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql://postgres.gymbtnuoahfpaqdwhwqj:Ltech*!9349@aws-0-sa-east-1.pooler.supabase.com:6543/postgres'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-db = SQLAlchemy(APP)
+db = SQLAlchemy(app)
 
 # Exemplo de como será a Tabela de Jardinagem
 class Jardinagem(db.Model):
@@ -33,6 +33,11 @@ class Jardinagem(db.Model):
             "status": self.status,
             "observacao": self.observacao
         }
+
+# ROTAS DA API (aqui ficam a rota '/' e as outras rotas)
+@app.route('/')
+def home():
+    return jsonify({"mensagem": "API do CondoConnect rodando com sucesso!"})
 
 # Espaço onde serão listados todos os eventos
 @app.route('/api/jardinagem', methods=['GET'])
@@ -70,8 +75,9 @@ def add_jardinagem():
     # ]
     # return jsonify(eventos)
 
-if __name_ == '__main__':
-# criar as tabelas de forma automática no PostgreSQL em caso de ela não existitem
+if __name__ == '__main__':
+    # criar as tabelas de forma automática no PostgreSQL
     with app.app_context():
-        db.creat_all()
+        db.create_all()
+        
     app.run(debug=True, port=5000)
