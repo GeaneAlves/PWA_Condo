@@ -1,5 +1,5 @@
 from flask import Flask, jsonify, request
-from flask_cors import flask_CORS
+from flask_CORS import flask_CORS
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
 
