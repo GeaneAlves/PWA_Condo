@@ -1,6 +1,6 @@
-// Lógica de aplicação PWA para gerenciar o cache e permitir que a aplicação funcione offline.
-const API_URL = 'https://fantastic-space-sniffle-975495vj965jhp7q-5000.app.github.dev/api/jardinagem'
+const API_URL = 'https://fantastic-space-sniffle-975495vj965jhp7q-5000.app.github.dev/api/jardinagem';
 
+// Função para buscar e desenhar a lista
 async function carregarJardinagem() {
     const lista = document.getElementById('lista-jardinagem');
     if (!lista) return;
@@ -13,38 +13,39 @@ async function carregarJardinagem() {
 
         lista.innerHTML = '';
 
-        if (eventos.length === 0) {
+        if (!eventos || eventos.length === 0) {
             lista.innerHTML = '<li>Nenhuma atividade agendada no momento.</li>';
             return;
         }
 
         eventos.forEach(item => {
-            const li = document.creatElement('li');
+            const li = document.createElement('li');
             li.className = 'card-evento';
             li.innerHTML = `
                 <div class="evento-info">
-                    <span class="data-evento">📅 ${item.data}</span>
-                    <strong>${item.data}:</strong> ${item.atividade} - <em>(${item.status})</em>
+                    <span class="evento-data">📅 ${item.data}</span>
+                    <strong>${item.atividade}</strong>
                     <p>${item.observacao || ''}</p>
                 </div>
-                <span class="badge-status ${item.status.toLowerCase()}">${item.status}</span>
+                <span class="badge">${item.status}</span>
             `;
             lista.appendChild(li);
         });
     } catch (erro) {
-        console.error('Erro ao buscar dados da API:', erro);
-        lista.innerHTML = '<li>Não foi posível carregar a lista de manutenções.</li>';
-
+        console.error('Erro ao buscar dados:', erro);
+        lista.innerHTML = '<li>Erro ao carregar os dados de manutenção do jardim.</li>';
     }
 }
 
+// Executa ao carregar a página
 document.addEventListener('DOMContentLoaded', carregarJardinagem);
 
+// Lógica de envio do formulário
 const formJardinagem = document.getElementById('form-jardinagem');
 
 if (formJardinagem) {
     formJardinagem.addEventListener('submit', async (event) => {
-        event.preventDefault(); // Impede a página de recarregar
+        event.preventDefault();
 
         const novoEvento = {
             atividade: document.getElementById('atividade').value,
@@ -64,8 +65,8 @@ if (formJardinagem) {
 
             if (resposta.ok) {
                 alert('Manutenção cadastrada com sucesso!');
-                formJardinagem.reset(); // Limpa os campos
-                carregarJardinagem();   // Recarrega a lista automaticamente na tela
+                formJardinagem.reset();
+                carregarJardinagem(); // Atualiza a lista na hora
             } else {
                 alert('Erro ao salvar os dados no servidor.');
             }
