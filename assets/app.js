@@ -1,6 +1,5 @@
-const API_URL = 'https://fantastic-space-sniffle-975495vj965jhp7q-5000.app.github.dev/api/jardinagem';
+const API_URL = 'https://curly-acorn-g4rwqr97q497fxgq-5000.app.github.dev/api/jardinagem'; // Mantenha a sua URL da porta 5000
 
-// Função para buscar e desenhar a lista
 async function carregarJardinagem() {
     const lista = document.getElementById('lista-jardinagem');
     if (!lista) return;
@@ -21,13 +20,19 @@ async function carregarJardinagem() {
         eventos.forEach(item => {
             const li = document.createElement('li');
             li.className = 'card-evento';
+            
+            // Renderiza as informações e os botões de ação
             li.innerHTML = `
                 <div class="evento-info">
                     <span class="evento-data">📅 ${item.data}</span>
                     <strong>${item.atividade}</strong>
                     <p>${item.observacao || ''}</p>
                 </div>
-                <span class="badge">${item.status}</span>
+                <div class="evento-acoes">
+                    <span class="badge ${item.status.toLowerCase().replace(/\s+/g, '-')}">${item.status}</span>
+                    ${item.status !== 'Concluído' ? `<button class="btn-acao btn-concluir" onclick="concluirEvento(${item.id})">✅</button>` : ''}
+                    <button class="btn-acao btn-excluir" onclick="excluirEvento(${item.id})">🗑️</button>
+                </div>
             `;
             lista.appendChild(li);
         });
@@ -37,12 +42,38 @@ async function carregarJardinagem() {
     }
 }
 
-// Executa ao carregar a página
-document.addEventListener('DOMContentLoaded', carregarJardinagem);
+// Função para marcar como Concluído
+async function concluirEvento(id) {
+    try {
+        const resposta = await fetch(`${API_URL}/${id}/concluir`, { method: 'PUT' });
+        if (resposta.ok) {
+            carregarJardinagem();
+        } else {
+            alert('Não foi possível atualizar o status.');
+        }
+    } catch (erro) {
+        console.error('Erro ao concluir evento:', erro);
+    }
+}
+
+// Função para Deletar
+async function excluirEvento(id) {
+    if (!confirm('Deseja realmente excluir este agendamento?')) return;
+
+    try {
+        const resposta = await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+        if (resposta.ok) {
+            carregarJardinagem();
+        } else {
+            alert('Não foi possível excluir o registro.');
+        }
+    } catch (erro) {
+        console.error('Erro ao excluir evento:', erro);
+    }
+}
 
 // Lógica de envio do formulário
 const formJardinagem = document.getElementById('form-jardinagem');
-
 if (formJardinagem) {
     formJardinagem.addEventListener('submit', async (event) => {
         event.preventDefault();
@@ -57,16 +88,14 @@ if (formJardinagem) {
         try {
             const resposta = await fetch(API_URL, {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
+                headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(novoEvento)
             });
 
             if (resposta.ok) {
                 alert('Manutenção cadastrada com sucesso!');
                 formJardinagem.reset();
-                carregarJardinagem(); // Atualiza a lista na hora
+                carregarJardinagem();
             } else {
                 alert('Erro ao salvar os dados no servidor.');
             }
@@ -76,3 +105,5 @@ if (formJardinagem) {
         }
     });
 }
+
+document.addEventListener('DOMContentLoaded', carregarJardinagem);
