@@ -107,3 +107,121 @@ if (formJardinagem) {
 }
 
 document.addEventListener('DOMContentLoaded', carregarJardinagem);
+
+// URL base para chamados
+const API_CHAMADOS_URL = 'https://curly-acorn-g4rwqr97q497fxgq-5000.app.github.dev/api/chamados';
+
+// 1. Carregar lista de chamados
+async function carregarChamados() {
+    const lista = document.getElementById('lista-chamados');
+    if (!lista) return;
+
+    lista.innerHTML = '<li>Carregando chamados...</li>';
+
+    try {
+        const resposta = await fetch(API_CHAMADOS_URL);
+        const chamados = await resposta.json();
+
+        lista.innerHTML = '';
+
+        if (!chamados || chamados.length === 0) {
+            lista.innerHTML = '<li>Nenhum chamado pendente no momento.</li>';
+            return;
+        }
+
+        chamados.forEach(item => {
+            const li = document.createElement('li');
+            li.className = 'card-evento';
+            li.innerHTML = `
+                <div class="evento-info">
+                    <span class="evento-data">📅 ${item.data_abertura} | 📍 <strong>${item.apartamento}</strong></span>
+                    <p style="margin: 4px 0;"><strong>${item.categoria}:</strong> ${item.descricao}</p>
+                    <small>Prioridade: <strong>${item.prioridade}</strong></small>
+                </div>
+                <div class="evento-acoes">
+                    <span class="badge ${item.status.toLowerCase().replace(/\s+/g, '-')}">${item.status}</span>
+                    ${item.status !== 'Resolvido' ? `<button class="btn-acao btn-concluir" title="Marcar como Resolvido" onclick="concluirChamado(${item.id})">✅</button>` : ''}
+                    <button class="btn-acao btn-excluir" title="Excluir Chamado" onclick="excluirChamado(${item.id})">🗑️</button>
+                </div>
+            `;
+            lista.appendChild(li);
+        });
+    } catch (erro) {
+        console.error('Erro ao buscar chamados:', erro);
+        lista.innerHTML = '<li>Erro ao carregar os chamados.</li>';
+    }
+}
+
+// 2. Concluir / Resolver chamado
+async function concluirChamado(id) {
+    try {
+        const resposta = await fetch(`${API_CHAMADOS_URL}/${id}/status`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'Resolvido' })
+        });
+        if (resposta.ok) carregarChamados();
+    } catch (erro) {
+        console.error('Erro ao resolver chamado:', erro);
+    }
+}
+
+// 3. Excluir chamado
+async function excluirChamado(id) {
+    if (!confirm('Deseja excluir este chamado?')) return;
+    try {
+        const resposta = await fetch(`${API_CHAMADOS_URL}/${id}`, { method: 'DELETE' });
+        if (resposta.ok) carregarChamados();
+    } catch (erro) {
+        console.error('Erro ao excluir chamado:', erro);
+    }
+}
+
+// 4. Envio do formulário de chamados
+const formChamado = document.getElementById('form-chamado');
+
+if (formChamado) {
+    formChamado.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Impede o recarregamento da página
+
+        const campoApartamento = document.getElementById('apartamento');
+        const campoCategoria = document.getElementById('categoria');
+        const campoPrioridade = document.getElementById('prioridade');
+        const campoDescricao = document.getElementById('descricao-chamado');
+
+        const novoChamado = {
+            apartamento: campoApartamento.value,
+            categoria: campoCategoria.value,
+            prioridade: campoPrioridade.value,
+            descricao: campoDescricao.value
+        };
+
+        try {
+            const resposta = await fetch(API_CHAMADOS_URL, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(novoChamado)
+            });
+
+            if (resposta.ok) {
+                alert('Chamado registrado com sucesso!');
+                formChamado.reset();
+                carregarChamados(); // Atualiza a lista na hora
+            } else {
+                const erroData = await resposta.json();
+                alert(`Erro: ${erroData.erro || 'Falha ao salvar o chamado'}`);
+            }
+        } catch (erro) {
+            console.error('Erro na requisição do chamado:', erro);
+            alert('Falha de conexão com a API.');
+        }
+    });
+}
+
+// Atualize o DOMContentLoaded para carregar ambas as listas ao abrir o app
+document.addEventListener('DOMContentLoaded', () => {
+    carregarJardinagem();
+    carregarChamados();
+});

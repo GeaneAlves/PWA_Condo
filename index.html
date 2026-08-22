@@ -49,6 +49,50 @@
         </form>
     </section>
 
+    <!-- 3. Seção de Chamados dos Moradores -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="chamados-container">
+        <h2>🛠️ Chamados e Reparos</h2>
+        <ul id="lista-chamados"></ul>
+    </div>
+
+    <section id="form-chamados-container">
+        <h2>📢 Abrir Novo Chamado</h2>
+        <form id="form-chamado">
+            <div class="campo">
+                <label for="apartamento">Apartamento / Bloco:</label>
+                <input type="text" id="apartamento" placeholder="Ex: Apt 302 - Bloco B" required>
+            </div>
+
+            <div class="campo">
+                <label for="categoria">Categoria:</label>
+                <select id="categoria">
+                    <option value="Elétrica">⚡ Elétrica (Lâmpada, tomada, etc.)</option>
+                    <option value="Hidráulica">🚰 Hidráulica (Vazamento, cano, etc.)</option>
+                    <option value="Estrutural">🧱 Estrutural (Portão, pintura, etc.)</option>
+                    <option value="Geral">📦 Outros / Geral</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="prioridade">Prioridade:</label>
+                <select id="prioridade">
+                    <option value="Baixa">🟢 Baixa</option>
+                    <option value="Média" selected>🟡 Média</option>
+                    <option value="Alta">🔴 Alta (Urgente)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="descricao-chamado">Descrição do Problema:</label>
+                <textarea id="descricao-chamado" placeholder="Descreva o reparo necessário detalhadamente..." required></textarea>
+            </div>
+
+            <button type="submit" id="btn-salvar-chamado" style="background-color: #d97706;">Registrar Chamado</button>
+        </form>
+    </section>
+
     <!-- Chamada única do JavaScript -->
     <script src="assets/app.js"></script>
 </body>
