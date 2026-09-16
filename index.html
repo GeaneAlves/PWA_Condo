@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CondoConnect</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="assets/style.css">
+    <meta name="theme-color" content="#2e7d32">
+
+    <!-- Alternador de Perfil -->
+    <div class="perfil-switcher">
+        <button id="btn-perfil-morador" class="btn-tab ativo" onclick="trocarPerfil('morador')">🏠 Área do Morador</button>
+        <button id="btn-perfil-sindico" class="btn-tab" onclick="trocarPerfil('sindico')">🔑 Painel do Síndico / Portaria</button>
+    </div>
+
+        <button type="button" onclick="alternarTelaAuth('cadastro')">Criar conta</button>
+        <button type="button" onclick="alternarTelaAuth('login')">Fazer Login</button>
+
+    <!-- Barra Superior de Sessão -->
+    <header style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h1>CondoConnect</h1>
+        <div id="usuario-sessao-container" style="display: none; align-items: center; gap: 10px;">
+            <span id="nome-usuario-logado" style="font-weight: bold; color: #1e293b;"></span>
+            <button onclick="fazerLogout()" class="btn-acao btn-excluir" style="font-size: 0.85rem;">Sair 🚪</button>
+        </div>
+    </header>
+
+    <!-- Tela Inicial de Autenticação -->
+    <div id="auth-container" class="card-feed" style="max-width: 420px; margin: 30px auto; padding: 20px;">
+        <h2 id="auth-titulo" style="text-align: center; margin-bottom: 15px;">Acesso ao CondoConnect</h2>
+        
+        <!-- Formulário de Login -->
+        <form id="form-login">
+            <div class="campo">
+                <label for="login-username">Login / Usuário:</label>
+                <input type="text" id="login-username" placeholder="Digite seu usuário ou Admin" required>
+            </div>
+            <div class="campo">
+                <label for="login-senha">Senha:</label>
+                <input type="password" id="login-senha" placeholder="Digite sua senha" required>
+            </div>
+            <button type="submit" style="background: #0284c7; width: 100%; margin-top: 10px;">Entrar</button>
+            <p style="text-align: center; margin-top: 12px; font-size: 0.9rem;">
+                É morador novo? <a href="#" onclick="alternarTelaAuth('cadastro')">Criar conta</a>
+            </p>
+        </form>
+
+        <!-- Formulário de Cadastro do Morador -->
+        <form id="form-cadastro" style="display: none;">
+            <div class="campo">
+                <label for="cad-username">Nome de Usuário (login):</label>
+                <input type="text" id="cad-username" placeholder="Escolha um login (Ex: carlossilva)" required>
+            </div>
+            <div class="campo">
+                <label for="cad-apto">Apartamento / Bloco:</label>
+                <input type="text" id="cad-apto" placeholder="Ex: Ap 204 - Bloco B" required>
+            </div>
+            <div class="campo">
+                <label for="cad-senha">Senha (5 dígitos numéricos):</label>
+                <input type="password" id="cad-senha" maxlength="5" pattern="\d{5}" placeholder="Ex: 12345" required>
+            </div>
+            <button type="submit" style="background: #16a34a; width: 100%; margin-top: 10px;">Criar Conta</button>
+            <p style="text-align: center; margin-top: 12px; font-size: 0.9rem;">
+                Já possui conta? <a href="#" onclick="alternarTelaAuth('login')">Fazer Login</a>
+            </p>
+        </form>
+    </div>
+
+    <!-- ==================== 1. ÁREA DO MORADOR (SOMENTE LEITURA + COLABORAÇÃO) ==================== -->
+    <main id="visao-morador" style="display: none;">
+        
+        <!-- Comunicados do Síndico (Apenas Visualização) -->
+        <section class="secao-leitura">
+            <h2>📢 Mural de Comunicados do Síndico</h2>
+            <ul id="lista-avisos-morador"></ul>
+        </section>
+
+        <!-- Manutenções do Jardim (Apenas Visualização) -->
+        <section class="secao-leitura">
+            <h2>🌿 Cronograma de Jardinagem</h2>
+            <ul id="lista-jardinagem-morador"></ul>
+        </section>
+
+        <!-- Prestadores de Serviço em Atendimento (Apenas Visualização) -->
+        <section class="secao-leitura">
+            <h2>👷 Prestadores de Serviço no Prédio</h2>
+            <ul id="lista-prestadores-morador"></ul>
+        </section>
+
+        <!-- Moradores e Veículos Registrados (Apenas Visualização) -->
+        <section class="secao-leitura">
+            <h2>🚗 Vagas e Veículos Registrados</h2>
+            <ul id="lista-moradores-morador"></ul>
+        </section>
+
+        <!-- Encomendas do Apartamento -->
+        <section class="secao-leitura">
+            <h2>📦 Entregas e Caixas de Correio</h2>
+            <ul id="lista-encomendas-morador"></ul>
+        </section>
+
+        <!-- Abertura de Chamado pelo Morador -->
+        <section style="margin-top: 25px;">
+            <h2>🛠️ Meus Chamados & Abrir Solicitação</h2>
+            <ul id="lista-chamados-morador"></ul>
+            
+            <form id="form-chamado" class="form-card">
+                <input type="text" id="apartamento" placeholder="Seu Apartamento (Ex: Ap 302 - Bloco B)" required>
+                <select id="categoria">
+                    <option value="Elétrica">⚡ Elétrica</option>
+                    <option value="Hidráulica">🚰 Hidráulica</option>
+                    <option value="Estrutural">🧱 Estrutural</option>
+                    <option value="Geral">📦 Outros</option>
+                </select>
+                <select id="prioridade">
+                    <option value="Baixa">🟢 Baixa</option>
+                    <option value="Média" selected>🟡 Média</option>
+                    <option value="Alta">🔴 Alta</option>
+                </select>
+                <textarea id="descricao-chamado" placeholder="Descreva o reparo necessário..." required></textarea>
+                <button type="submit" style="background-color: #d97706; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Registrar Chamado</button>
+            </form>
+        </section>
+
+        <!-- Módulos Colaborativos dos Moradores -->
+        <section style="margin-top: 30px;">
+            <h2>🔍 Achados e Perdidos</h2>
+            <div id="feed-achados" class="grid-feed"></div>
+            <form id="form-achado" class="form-card">
+                <input type="text" id="achado-item" placeholder="Item encontrado" required>
+                <input type="text" id="achado-local" placeholder="Local encontrado" required>
+                <input type="text" id="achado-contato" placeholder="Seu Contato/Apto" required>
+                <input type="file" id="achado-img" accept="image/*">
+                <button type="submit" style="background: #0284c7; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Publicar no Feed</button>
+            </form>
+        </section>
+
+        <section style="margin-top: 30px;">
+            <h2>🛍️ Bazar do Condomínio (Classificados)</h2>
+            <div id="feed-classificados" class="grid-feed"></div>
+            <form id="form-classificado" class="form-card">
+                <input type="text" id="venda-titulo" placeholder="Item à venda" required>
+                <input type="text" id="venda-preco" placeholder="Preço (Ex: R$ 50,00)" required>
+                <input type="text" id="venda-apto" placeholder="Seu Apto" required>
+                <input type="tel" id="venda-tel" placeholder="WhatsApp" required>
+                <textarea id="venda-desc" placeholder="Detalhes do produto..."></textarea>
+                <input type="file" id="venda-img" accept="image/*">
+                <button type="submit" style="background: #16a34a; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Anunciar Desapego</button>
+            </form>
+        </section>
+
+        <section style="margin-top: 30px;">
+            <h2>🚗 Carona Solidária</h2>
+            <ul id="lista-caronas"></ul>
+            <form id="form-carona" class="form-card">
+                <input type="text" id="carona-motorista" placeholder="Seu Nome" required>
+                <input type="text" id="carona-apto" placeholder="Seu Apto" required>
+                <input type="text" id="carona-destino" placeholder="Destino" required>
+                <input type="text" id="carona-horario" placeholder="Horário e Dias" required>
+                <input type="number" id="carona-vagas" placeholder="Vagas" min="1" max="4" value="2" required>
+                <input type="tel" id="carona-contato" placeholder="WhatsApp" required>
+                <button type="submit" style="background: #9333ea; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Oferecer Carona</button>
+            </form>
+        </section>
+
+        <!-- Pesquisa de Satisfação -->
+        <section style="margin-top: 30px;">
+            <h2>⭐ Responder Pesquisa de Satisfação</h2>
+            <form id="form-pesquisa" class="form-card">
+                <input type="text" id="pesquisa-apto" placeholder="Seu Apartamento" required>
+                <label>Pintura:</label><select id="nota-pintura"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option></select>
+                <label>Jardim:</label><select id="nota-jardim"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option></select>
+                <label>Limpeza:</label><select id="nota-limpeza"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option></select>
+                <label>Administração:</label><select id="nota-admin"><option value="5">⭐⭐⭐⭐⭐</option><option value="4">⭐⭐⭐⭐</option><option value="3">⭐⭐⭐</option><option value="2">⭐⭐</option><option value="1">⭐</option></select>
+                <textarea id="pesquisa-comentario" placeholder="Comentários/Sugestões..."></textarea>
+                <button type="submit" style="background: #4f46e5; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Enviar Avaliação</button>
+            </form>
+        </section>
+    </main>
+
+    <!-- ==================== 2. PAINEL DO SÍNDICO (GESTÃO TOTAL + CADASTROS) ==================== -->
+    <main id="visao-sindico" style="display: none;">
+        
+        <!-- Formulário e Gestão de Jardinagem -->
+        <section>
+            <h2>➕ Agendar Manutenção de Jardinagem</h2>
+            <form id="form-jardinagem" class="form-card">
+                <input type="text" id="atividade" placeholder="Atividade (Ex: Poda)" required>
+                <input type="date" id="data" required>
+                <select id="status"><option value="Agendado">Agendado</option><option value="Em Andamento">Em Andamento</option></select>
+                <textarea id="observacao" placeholder="Observações..."></textarea>
+                <button type="submit" style="background: #15803d; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Salvar Agendamento</button>
+            </form>
+            <ul id="lista-jardinagem" style="margin-top: 15px;"></ul>
+        </section>
+
+        <!-- Formulário e Gestão de Comunicados -->
+        <section style="margin-top: 30px;">
+            <h2>✍️ Publicar Comunicado</h2>
+            <form id="form-aviso" class="form-card">
+                <input type="text" id="aviso-titulo" placeholder="Título" required>
+                <select id="aviso-tipo"><option value="Geral">Geral</option><option value="Manutenção">Manutenção</option><option value="Assembleia">Assembleia</option><option value="Urgente">Urgente</option></select>
+                <textarea id="aviso-mensagem" placeholder="Mensagem..." required></textarea>
+                <input type="file" id="aviso-imagem" accept="image/*">
+                <button type="submit" style="background: #2563eb; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Publicar Aviso</button>
+            </form>
+            <ul id="lista-avisos" style="margin-top: 15px;"></ul>
+        </section>
+
+        <!-- Formulário e Gestão de Moradores e Veículos -->
+        <section style="margin-top: 30px;">
+            <h2>👤 Cadastrar Morador & Veículo</h2>
+            <form id="form-morador" class="form-card">
+                <input type="text" id="morador-nome" placeholder="Nome Completo" required>
+                <input type="text" id="morador-apto" placeholder="Apartamento" required>
+                <input type="tel" id="morador-telefone" placeholder="Telefone">
+                <input type="text" id="morador-vaga" placeholder="Vaga">
+                <input type="text" id="morador-placa" placeholder="Placa do Veículo">
+                <input type="text" id="morador-modelo" placeholder="Modelo / Cor">
+                <textarea id="morador-seguranca" placeholder="Observações de Segurança"></textarea>
+                <button type="submit" style="background: #047857; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Cadastrar na Portaria</button>
+            </form>
+            <ul id="lista-moradores" style="margin-top: 15px;"></ul>
+        </section>
+
+        <!-- Formulário e Gestão de Prestadores -->
+        <section style="margin-top: 30px;">
+            <h2>👷 Registrar Prestador de Serviço</h2>
+            <form id="form-prestador" class="form-card">
+                <input type="text" id="prestador-nome" placeholder="Nome do Prestador" required>
+                <input type="text" id="prestador-doc" placeholder="RG / CPF" required>
+                <input type="text" id="prestador-empresa" placeholder="Empresa / Serviço" required>
+                <input type="text" id="prestador-destino" placeholder="Destino / Autorizado Por" required>
+                <input type="tel" id="prestador-telefone" placeholder="Telefone">
+                <button type="submit" style="background: #0284c7; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Registrar Entrada</button>
+            </form>
+            <ul id="lista-prestadores" style="margin-top: 15px;"></ul>
+        </section>
+
+        <!-- Anunciar Encomendas -->
+        <section style="margin-top: 30px;">
+            <h2>📬 Anunciar Chegada de Encomenda</h2>
+            <form id="form-encomenda" class="form-card">
+                <input type="text" id="encomenda-unidade" placeholder="Apartamento (Ex: 101 a 408)" required>
+                <input type="text" id="encomenda-tipo" placeholder="Tipo de Pacote" required>
+                <select id="encomenda-local"><option value="Caixa de Correio">Caixa de Correio</option><option value="Portaria">Portaria</option></select>
+                <input type="text" id="encomenda-rastreio" placeholder="Rastreio / Nota">
+                <button type="submit" style="background: #7c3aed; color: #fff; padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer;">Anunciar Entrega</button>
+            </form>
+            <ul id="lista-encomendas" style="margin-top: 15px;"></ul>
+        </section>
+
+        <!-- Gestão Geral de Chamados -->
+        <section style="margin-top: 30px;">
+            <h2>🛠️ Todos os Chamados do Condomínio</h2>
+            <ul id="lista-chamados"></ul>
+        </section>
+
+        <!-- Resultados da Pesquisa de Satisfação -->
+        <section style="margin-top: 30px;">
+            <h2>📊 Relatório de Satisfação</h2>
+            <div class="grid-utilidades">
+                <div class="card-utilidade">🎨 Pintura: <span id="media-pintura">0.0</span>/5</div>
+                <div class="card-utilidade">🌿 Jardim: <span id="media-jardim">0.0</span>/5</div>
+                <div class="card-utilidade">🧹 Limpeza: <span id="media-limpeza">0.0</span>/5</div>
+                <div class="card-utilidade">🏢 Admin: <span id="media-admin">0.0</span>/5</div>
+            </div>
+            <ul id="lista-pesquisas" style="margin-top: 15px;"></ul>
+        </section>
+    </main>
+</head>
+<body>
+
+    
+
+    <h1>CondoConnect - Painel do Condomínio</h1>
+
+    <!-- Seção de Utilidade Pública & Emergências -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="faq-utilidades-container">
+        <h2>ℹ️ Guia Prático & Telefones Úteis</h2>
+        
+        <div class="grid-utilidades">
+            <!-- Emergências -->
+            <div class="card-utilidade card-destaque-emergencia">
+                <h3>🚨 Emergência & Segurança</h3>
+                <div class="item-contato">
+                    <span><strong>SAMU:</strong> Urgência médica</span>
+                    <a href="tel:192" class="btn-ligar">📞 192</a>
+                </div>
+                <div class="item-contato">
+                    <span><strong>Polícia Militar:</strong> Ocorrências</span>
+                    <a href="tel:190" class="btn-ligar">📞 190</a>
+                </div>
+                <div class="item-contato">
+                    <span><strong>Corpo de Bombeiros:</strong> Incêndios / Resgate</span>
+                    <a href="tel:193" class="btn-ligar">📞 193</a>
+                </div>
+            </div>
+
+            <!-- Saúde & Farmácia -->
+            <div class="card-utilidade">
+                <h3>🏥 Saúde 24 Horas</h3>
+                <p><strong>UPA Industrial (Mais próxima):</strong></p>
+                <p class="endereco-texto">📍 Av. Maria da Glória, 491 - Bairro Amazonas</p>
+                
+                <hr style="margin: 10px 0; border: 0; border-top: 1px dashed #cbd5e1;">
+                
+                <p><strong>Drogaria Pacheco (Centro) - 24h:</strong></p>
+                <p class="endereco-texto">📍 Av. Prefeito Gil Diniz, 675</p>
+                <a href="tel:3125863402" class="btn-ligar btn-secundario">📞 (31) 2586-3402</a>
+            </div>
+
+            <!-- Aplicativos & Serviços -->
+            <div class="card-utilidade">
+                <h3>📲 Entregas & Transporte</h3>
+                <p>Para recepção de delivery e transporte por aplicativo na portaria:</p>
+                <ul class="lista-apps">
+                    <li>🚗 <strong>Uber / 99:</strong> Informar número do bloco/portaria ao motorista.</li>
+                    <li>🍔 <strong>iFood / Delivery:</strong> Retirada de pedidos diretamente na portaria principal.</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Lista de Manutenções -->
+    <div id="jardinagem-container">
+        <h2>🗓️ Próximas Manutenções no Jardim</h2>
+        <ul id="lista-jardinagem"></ul>
+    </div>
+
+    <!-- 2. Formulário do Síndico -->
+    <section id="form-jardinagem-container">
+        <h2>➕ Agendar Manutenção de Jardinagem</h2>
+        <form id="form-jardinagem">
+            <div class="campo">
+                <label for="atividade">Atividade:</label>
+                <input type="text" id="atividade" placeholder="Ex: Poda das árvores" required>
+            </div>
+
+            <div class="campo">
+                <label for="data">Data Agendada:</label>
+                <input type="date" id="data" required>
+            </div>
+
+            <div class="campo">
+                <label for="status">Status:</label>
+                <select id="status">
+                    <option value="Agendado">Agendado</option>
+                    <option value="Em Andamento">Em Andamento</option>
+                    <option value="Concluído">Concluído</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="observacao">Observações (opcional):</label>
+                <textarea id="observacao" placeholder="Ex: Contratada equipe terceirizada"></textarea>
+            </div>
+
+            <button type="submit" id="btn-salvar">Salvar Agendamento</button>
+        </form>
+    </section>
+
+    <!-- 3. Seção de Chamados dos Moradores -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="chamados-container">
+        <h2>🛠️ Chamados e Reparos</h2>
+        <ul id="lista-chamados"></ul>
+    </div>
+
+    <section id="form-chamados-container">
+        <h2>📢 Abrir Novo Chamado</h2>
+        <form id="form-chamado">
+            <div class="campo">
+                <label for="apartamento">Apartamento / Bloco:</label>
+                <input type="text" id="apartamento" placeholder="Ex: Apt 302 - Bloco B" required>
+            </div>
+
+            <div class="campo">
+                <label for="categoria">Categoria:</label>
+                <select id="categoria">
+                    <option value="Elétrica">⚡ Elétrica (Lâmpada, tomada, etc.)</option>
+                    <option value="Hidráulica">🚰 Hidráulica (Vazamento, cano, etc.)</option>
+                    <option value="Estrutural">🧱 Estrutural (Portão, pintura, etc.)</option>
+                    <option value="Geral">📦 Outros / Geral</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="prioridade">Prioridade:</label>
+                <select id="prioridade">
+                    <option value="Baixa">🟢 Baixa</option>
+                    <option value="Média" selected>🟡 Média</option>
+                    <option value="Alta">🔴 Alta (Urgente)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="descricao-chamado">Descrição do Problema:</label>
+                <textarea id="descricao-chamado" placeholder="Descreva o reparo necessário detalhadamente..." required></textarea>
+            </div>
+
+            <button type="submit" id="btn-salvar-chamado" style="background-color: #d97706;">Registrar Chamado</button>
+        </form>
+    </section>
+
+    <!-- 4. Mural de Comunicados do Síndico -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="avisos-container">
+        <h2>📌 Mural de Comunicados</h2>
+        <ul id="lista-avisos"></ul>
+    </div>
+
+    <section id="form-avisos-container">
+        <h2>✍️ Publicar Novo Comunicado</h2>
+        <form id="form-aviso">
+            <div class="campo">
+                <label for="aviso-titulo">Título do Aviso:</label>
+                <input type="text" id="aviso-titulo" placeholder="Ex: Manutenção da Caixa d'Água" required>
+            </div>
+
+            <div class="campo">
+                <label for="aviso-tipo">Categoria / Importância:</label>
+                <select id="aviso-tipo">
+                    <option value="Geral">Informativo Geral</option>
+                    <option value="Manutenção">⚠️ Manutenção / Obras</option>
+                    <option value="Assembleia">🗳️ Assembleia / Reunião</option>
+                    <option value="Urgente">🚨 Urgente</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="aviso-mensagem">Mensagem / Detalhes:</label>
+                <textarea id="aviso-mensagem" placeholder="Informe as datas, horários e orientações aos moradores..." required></textarea>
+            </div>
+
+            <div class="campo">
+                <label for="aviso-imagem">Imagem ou Foto (opcional):</label>
+                <input type="file" id="aviso-imagem" accept="image/*">
+            </div>
+
+            <button type="submit" id="btn-salvar-aviso" style="background-color: #2563eb;">Publicar Aviso</button>
+        </form>
+    </section>
+
+    <!-- 5. Módulo Moradores, Veículos e Portaria -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="moradores-container">
+        <h2>🛡️ Portaria: Moradores e Veículos</h2>
+        <ul id="lista-moradores"></ul>
+    </div>
+
+    <section id="form-moradores-container">
+        <h2>👤 Cadastrar Morador & Veículo</h2>
+        <form id="form-morador">
+            <div class="campo">
+                <label for="morador-nome">Nome Completo do Morador:</label>
+                <input type="text" id="morador-nome" placeholder="Ex: Carlos Silva" required>
+            </div>
+
+            <div class="campo">
+                <label for="morador-apto">Apartamento / Bloco:</label>
+                <input type="text" id="morador-apto" placeholder="Ex: Ap 201 - Bloco A" required>
+            </div>
+
+            <div class="campo">
+                <label for="morador-telefone">Telefone / WhatsApp:</label>
+                <input type="tel" id="morador-telefone" placeholder="Ex: (31) 99999-8888">
+            </div>
+
+            <div class="campo">
+                <label for="morador-vaga">Vaga de Garagem:</label>
+                <input type="text" id="morador-vaga" placeholder="Ex: Vaga 15 - Subsolo">
+            </div>
+
+            <div class="campo">
+                <label for="morador-placa">Placa do Veículo:</label>
+                <input type="text" id="morador-placa" placeholder="Ex: ABC1D23" style="text-transform: uppercase;">
+            </div>
+
+            <div class="campo">
+                <label for="morador-modelo">Modelo / Cor do Carro/Moto:</label>
+                <input type="text" id="morador-modelo" placeholder="Ex: Onix Prata">
+            </div>
+
+            <div class="campo">
+                <label for="morador-seguranca">Anotações de Segurança / Portaria:</label>
+                <textarea id="morador-seguranca" placeholder="Ex: Autorizado para receber entregas na ausência. Permitir entrada da diarista Maria às terças."></textarea>
+            </div>
+
+            <button type="submit" id="btn-salvar-morador" style="background-color: #047857;">Cadastrar na Portaria</button>
+        </form>
+    </section>
+
+    <!-- 6. Módulo de Prestadores de Serviço e Terceirizados -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="prestadores-container">
+        <h2>👷 Controle de Prestadores de Serviço</h2>
+        <ul id="lista-prestadores"></ul>
+    </div>
+
+    <section id="form-prestadores-container">
+        <h2>📋 Registrar Entrada de Prestador</h2>
+        <form id="form-prestador">
+            <div class="campo">
+                <label for="prestador-nome">Nome do Profissional:</label>
+                <input type="text" id="prestador-nome" placeholder="Ex: Roberto Gomes" required>
+            </div>
+
+            <div class="campo">
+                <label for="prestador-doc">Documento (RG / CPF):</label>
+                <input type="text" id="prestador-doc" placeholder="Ex: MG-12.345.678 ou CPF" required>
+            </div>
+
+            <div class="campo">
+                <label for="prestador-empresa">Empresa / Tipo de Serviço:</label>
+                <input type="text" id="prestador-empresa" placeholder="Ex: Manutenção Elétrica / Claro Fibra" required>
+            </div>
+
+            <div class="campo">
+                <label for="prestador-destino">Destino / Autorizado Por:</label>
+                <input type="text" id="prestador-destino" placeholder="Ex: Ap 402 - Bloco A ou Síndico" required>
+            </div>
+
+            <div class="campo">
+                <label for="prestador-telefone">Telefone de Contato (opcional):</label>
+                <input type="tel" id="prestador-telefone" placeholder="Ex: (31) 98888-7777">
+            </div>
+
+            <button type="submit" id="btn-salvar-prestador" style="background-color: #0284c7;">Liberar Acesso / Registrar</button>
+        </form>
+    </section>    
+
+    <!-- 7. Módulo de Encomendas e Caixas de Correio -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="encomendas-container">
+        <h2>📦 Entregas & Caixas de Correio (101 ao 408)</h2>
+        <ul id="lista-encomendas"></ul>
+    </div>
+
+    <section id="form-encomendas-container">
+        <h2>📬 Anunciar Chegada de Encomenda</h2>
+        <form id="form-encomenda">
+            <div class="campo">
+                <label for="encomenda-unidade">Unidade / Apartamento Destino:</label>
+                <select id="encomenda-unidade" required>
+                    <option value="">Selecione o Apartamento (101 ao 408)</option>
+                    <!-- Bloco 1xx -->
+                    <option value="101">Apt 101</option><option value="102">Apt 102</option>
+                    <option value="103">Apt 103</option><option value="104">Apt 104</option>
+                    <option value="105">Apt 105</option><option value="106">Apt 106</option>
+                    <option value="107">Apt 107</option><option value="108">Apt 108</option>
+                    <!-- Bloco 2xx -->
+                    <option value="201">Apt 201</option><option value="202">Apt 202</option>
+                    <option value="203">Apt 203</option><option value="204">Apt 204</option>
+                    <option value="205">Apt 205</option><option value="206">Apt 206</option>
+                    <option value="207">Apt 207</option><option value="208">Apt 208</option>
+                    <!-- Bloco 3xx -->
+                    <option value="301">Apt 301</option><option value="302">Apt 302</option>
+                    <option value="303">Apt 303</option><option value="304">Apt 304</option>
+                    <option value="305">Apt 305</option><option value="306">Apt 306</option>
+                    <option value="307">Apt 307</option><option value="308">Apt 308</option>
+                    <!-- Bloco 4xx -->
+                    <option value="401">Apt 401</option><option value="402">Apt 402</option>
+                    <option value="403">Apt 403</option><option value="404">Apt 404</option>
+                    <option value="405">Apt 405</option><option value="406">Apt 406</option>
+                    <option value="407">Apt 407</option><option value="408">Apt 408</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="encomenda-tipo">Tipo de Volume / Pacote:</label>
+                <input type="text" id="encomenda-tipo" placeholder="Ex: Envelope / Pacote Shopee / Encomenda Mercado Livre" required>
+            </div>
+
+            <div class="campo">
+                <label for="encomenda-local">Local Onde Foi Deixado:</label>
+                <select id="encomenda-local">
+                    <option value="Caixa de Correio" selected>📬 Deixado na Caixa de Correio</option>
+                    <option value="Portaria Principal">🏢 Guardado na Portaria (Volume Maior)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="encomenda-rastreio">Código / Nota (opcional):</label>
+                <input type="text" id="encomenda-rastreio" placeholder="Ex: BR123456789 ou Inicial do Destinatário">
+            </div>
+
+            <button type="submit" id="btn-salvar-encomenda" style="background-color: #7c3aed;">Anunciar Entrega</button>
+        </form>
+    </section>
+
+    <!-- 8. Módulo de Pesquisa de Satisfação -->
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <div id="pesquisa-container">
+        <h2>📊 Resultados da Pesquisa de Satisfação</h2>
+        <div id="resumo-satisfacao" class="grid-utilidades">
+            <div class="card-utilidade">🎨 <strong>Pintura:</strong> <span id="media-pintura">0.0</span> / 5.0 ⭐</div>
+            <div class="card-utilidade">🌿 <strong>Jardim:</strong> <span id="media-jardim">0.0</span> / 5.0 ⭐</div>
+            <div class="card-utilidade">🧹 <strong>Limpeza:</strong> <span id="media-limpeza">0.0</span> / 5.0 ⭐</div>
+            <div class="card-utilidade">🏢 <strong>Administração:</strong> <span id="media-admin">0.0</span> / 5.0 ⭐</div>
+        </div>
+        <ul id="lista-pesquisas" style="margin-top: 15px;"></ul>
+    </div>
+
+    <section id="form-pesquisa-container">
+        <h2>⭐ Responder Pesquisa de Satisfação</h2>
+        <form id="form-pesquisa">
+            <div class="campo">
+                <label for="pesquisa-apto">Apartamento / Bloco:</label>
+                <input type="text" id="pesquisa-apto" placeholder="Ex: Ap 102 - Bloco A" required>
+            </div>
+
+            <div class="campo">
+                <label for="nota-pintura">🎨 Pintura do Prédio e Fachada:</label>
+                <select id="nota-pintura">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 - Excelente)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 - Bom)</option>
+                    <option value="3">⭐⭐⭐ (3 - Regular)</option>
+                    <option value="2">⭐⭐ (2 - Ruim)</option>
+                    <option value="1">⭐ (1 - Péssimo)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="nota-jardim">🌿 Cuidados com o Jardim e Áreas Verdes:</label>
+                <select id="nota-jardim">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 - Excelente)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 - Bom)</option>
+                    <option value="3">⭐⭐⭐ (3 - Regular)</option>
+                    <option value="2">⭐⭐ (2 - Ruim)</option>
+                    <option value="1">⭐ (1 - Péssimo)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="nota-limpeza">🧹 Limpeza dos Espaços Comuns (Hall, Escadas, Portaria):</label>
+                <select id="nota-limpeza">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 - Excelente)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 - Bom)</option>
+                    <option value="3">⭐⭐⭐ (3 - Regular)</option>
+                    <option value="2">⭐⭐ (2 - Ruim)</option>
+                    <option value="1">⭐ (1 - Péssimo)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="nota-admin">🏢 Gestão e Administração do Síndico:</label>
+                <select id="nota-admin">
+                    <option value="5">⭐⭐⭐⭐⭐ (5 - Excelente)</option>
+                    <option value="4">⭐⭐⭐⭐ (4 - Bom)</option>
+                    <option value="3">⭐⭐⭐ (3 - Regular)</option>
+                    <option value="2">⭐⭐ (2 - Ruim)</option>
+                    <option value="1">⭐ (1 - Péssimo)</option>
+                </select>
+            </div>
+
+            <div class="campo">
+                <label for="pesquisa-comentario">Sugestões / Comentários (opcional):</label>
+                <textarea id="pesquisa-comentario" placeholder="Deixe seus elogios ou pontos de melhoria..."></textarea>
+            </div>
+
+            <button type="submit" id="btn-salvar-pesquisa" style="background-color: #4f46e5;">Enviar Avaliação</button>
+        </form>
+    </section>
+
+    <!-- Chamada única do JavaScript -->
+    <script src="assets/app.js"></script>
+</body>
+</html>
