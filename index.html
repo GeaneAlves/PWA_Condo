@@ -14,6 +14,11 @@
         <button id="btn-perfil-sindico" class="btn-tab" onclick="trocarPerfil('sindico')">🔑 Painel do Síndico / Portaria</button>
     </div>
 
+    <div class="user-bar" style="text-align: right; padding: 10px; font-weight: bold;">
+    Usuário: <span id="nome-usuario">Conectando...</span>
+    <button onclick="fazerLogout()" style="margin-left: 10px;">Sair</button>
+    </div>
+
         <button type="button" onclick="alternarTelaAuth('cadastro')">Criar conta</button>
         <button type="button" onclick="alternarTelaAuth('login')">Fazer Login</button>
 
@@ -31,7 +36,7 @@
         <h2 id="auth-titulo" style="text-align: center; margin-bottom: 15px;">Acesso ao CondoConnect</h2>
         
         <!-- Formulário de Login -->
-        <form id="form-login">
+        <form id="form-login" onsubmit="event.preventDefault();">
             <div class="campo">
                 <label for="login-username">Login / Usuário:</label>
                 <input type="text" id="login-username" placeholder="Digite seu usuário ou Admin" required>
@@ -47,23 +52,20 @@
         </form>
 
         <!-- Formulário de Cadastro do Morador -->
-        <form id="form-cadastro" style="display: none;">
-            <div class="campo">
-                <label for="cad-username">Nome de Usuário (login):</label>
-                <input type="text" id="cad-username" placeholder="Escolha um login (Ex: carlossilva)" required>
-            </div>
-            <div class="campo">
-                <label for="cad-apto">Apartamento / Bloco:</label>
-                <input type="text" id="cad-apto" placeholder="Ex: Ap 204 - Bloco B" required>
-            </div>
-            <div class="campo">
-                <label for="cad-senha">Senha (5 dígitos numéricos):</label>
-                <input type="password" id="cad-senha" maxlength="5" pattern="\d{5}" placeholder="Ex: 12345" required>
-            </div>
-            <button type="submit" style="background: #16a34a; width: 100%; margin-top: 10px;">Criar Conta</button>
-            <p style="text-align: center; margin-top: 12px; font-size: 0.9rem;">
-                Já possui conta? <a href="#" onclick="alternarTelaAuth('login')">Fazer Login</a>
-            </p>
+        <form id="form-cadastro" onsubmit="event.preventDefault();">
+    <div class="campo">
+        <label for="cad-username">Nome de Usuário (login):</label>
+        <input type="text" id="cad-username" required>
+    </div>
+    <div class="campo">
+        <label for="cad-apto">Apartamento / Bloco:</label>
+        <input type="text" id="cad-apto" required>
+    </div>
+    <div class="campo">
+        <label for="cad-senha">Senha (5 dígitos numéricos):</label>
+        <input type="password" id="cad-senha" maxlength="5" required>
+    </div>
+    <button type="submit" style="background: #16a34a; width: 100%; margin-top: 10px;">Cadastrar Conta</button>
         </form>
     </div>
 
